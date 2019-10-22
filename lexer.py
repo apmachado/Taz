@@ -97,3 +97,11 @@ def t_ID(t):
     if t.value in reserved_words:
         t.type = reserved_words[ t.value ]
     return t
+
+def t_SINGLE_LINE_COMMENT(t):
+  r'//.*'
+  pass
+
+def t_MULT_LINE_COMMENT(t):
+  r'(/\*(.|\n)*?\*/)'
+  pass
