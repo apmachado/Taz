@@ -1,5 +1,3 @@
-from ply import *
-
 # Palavras reservadas
 
 reserved_words = {
@@ -85,18 +83,22 @@ def t_NUMBER(t):
 	return t
 
 def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
+  r'\n+'
+  t.lexer.lineno += len(t.value)
+
+def find_column(input, token):
+  line_start = input.rfind('\n', 0, token.lexpos) + 1
+  return (token.lexpos - line_start) + 1
 
 def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
+  print("Illegal character '%s'" % t.value[0])
+  t.lexer.skip(1)
 
 def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    if t.value in reserved_words:
-        t.type = reserved_words[ t.value ]
-    return t
+  r'[a-zA-Z_][a-zA-Z_0-9]*'
+  if t.value in reserved_words:
+    t.type = reserved_words[ t.value ]
+  return t
 
 def t_SINGLE_LINE_COMMENT(t):
   r'//.*'
