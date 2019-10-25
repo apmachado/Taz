@@ -13,8 +13,7 @@ reserved_words = {
   'int' : 'INT',
   'if' : 'IF',
   'else' : 'ELSE',
-  'while' : 'WHILE',
-  'System.out.println' : 'PRINTLN',
+  'while' : 'WHILE', 
   'length' : 'LENGTH',
   'true' : 'TRUE',
   'false' : 'FALSE',
@@ -48,6 +47,7 @@ tokens = [
   'COMMA',            # ,
   'SEMICOLON',        # ;
   'AND',              # &&
+  'PRINTLN',          
   'DOT'               # .
 ] + list(reserved_words.values())
 
@@ -76,6 +76,9 @@ t_SEMICOLON = r';'
 t_AND = r'&&'
 t_DOT = r'\.'
 
+def t_PRINTLN(t):
+  r'System.out.println'
+  return t
 
 def t_NUMBER(t):
 	r'\d+'

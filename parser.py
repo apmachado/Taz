@@ -1,16 +1,11 @@
 from lexer import tokens
 
 
-precedence = (
-  ('left', 'ADDOP', 'SUBOP'),
-  ('left', 'MULTOP')
- )
-
 def p_prog(p):
   'prog : main class_aux '
 
 def p_main(p):
-  'main : CLASS ID OPENBRACER PUBLIC STATIC VOID MAIN OPENPAREN STRING OPENBRACKET CLOSEBRACKET ID OPENPAREN OPENBRACER cmd CLOSEBRACER CLOSEBRACER'
+  'main : CLASS ID OPENBRACER PUBLIC STATIC VOID MAIN OPENPAREN STRING OPENBRACKET CLOSEBRACKET ID CLOSEPAREN OPENBRACER cmd_aux CLOSEBRACER CLOSEBRACER'
 
 def p_class_aux(p):
   '''class_aux : class_aux class

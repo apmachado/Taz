@@ -6,7 +6,7 @@ import ply.yacc as yacc
 prog = '''
 class Factorial{
   public static void main(String[] a){
-  System.out.println(new Fac().ComputeFac(10));
+    System.out.println(new Fac().ComputeFac(10));
   }
 }
 
@@ -26,7 +26,8 @@ scanner = lex.lex(module=lexer)
 scanner.input(prog)
 
 
-# for token in scanner:
-#   print(token)
+for token in scanner:
+  print(token)
 
 par = yacc.yacc(module=parser)
+par.parse(prog)
