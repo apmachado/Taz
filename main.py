@@ -26,7 +26,7 @@ scanner = lex.lex(module=lexer)
 scanner.input(prog)
 
 
-for token in scanner:
-  print(token)
+# for token in scanner:
+#   print(token)
 
 par = yacc.yacc(module=parser)

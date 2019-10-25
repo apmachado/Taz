@@ -1,46 +1,46 @@
 from lexer import tokens
 
-def p_epsilon(p):
-  'epsilon :'
-  pass
+
+precedence = (
+  ('left', 'ADDOP', 'SUBOP'),
+  ('left', 'MULTOP')
+ )
 
 def p_prog(p):
-  '''prog : prog_aux
-          | epsilon'''
-
-def p_prog_aux(p):
-  '''prog_aux : prog_aux class
-              | main'''
+  'prog : main class_aux '
 
 def p_main(p):
   'main : CLASS ID OPENBRACER PUBLIC STATIC VOID MAIN OPENPAREN STRING OPENBRACKET CLOSEBRACKET ID OPENPAREN OPENBRACER cmd CLOSEBRACER CLOSEBRACER'
 
-def p_classe(p):
-  '''class : classe_aux
-           | epsilon'''
+def p_class_aux(p):
+  '''class_aux : class_aux class
+               | epsilon'''
 
-def p_classe_aux(p):
-  '''classe_aux : CLASS ID OPENBRACER var method CLOSEBRACER
-                | CLASS ID EXTENDS ID OPENBRACER var method CLOSEBRACER'''
+def p_class(p):
+  '''class : CLASS ID OPENBRACER var_aux method_aux CLOSEBRACER
+           | CLASS ID EXTENDS ID OPENBRACER var_aux method_aux CLOSEBRACER'''
+
+def p_var_aux(p):
+  '''var_aux : var_aux var
+             | epsilon'''
 
 def p_var(p):
   'var : type ID SEMICOLON'
 
-def p_method(p):
-  '''method : method_aux
-            | epsilon'''
-
 def p_method_aux(p):
-  '''method_aux : PUBLIC type ID OPENPAREN CLOSEPAREN OPENBRACER var cmd RETURN exp SEMICOLON CLOSEBRACER
-                | PUBLIC type ID OPENPAREN params CLOSEPAREN OPENBRACER var cmd RETURN exp SEMICOLON CLOSEBRACER'''
+  '''method_aux : method_aux method
+                | epsilon'''
+
+def p_method(p):
+  '''method : PUBLIC type ID OPENPAREN CLOSEPAREN OPENBRACER var_aux cmd_aux RETURN exp SEMICOLON CLOSEBRACER
+            | PUBLIC type ID OPENPAREN params CLOSEPAREN OPENBRACER var_aux cmd_aux RETURN exp SEMICOLON CLOSEBRACER'''
 
 def p_params(p):
-  '''params : params_aux
-            | epsilon'''
+  'params : type ID type_aux'
 
-def p_params_aux(p):
-  '''params_aux : params_aux COMMA type ID
-                | type ID'''
+def p_type_aux(p):
+  '''type_aux : type_aux COMMA type ID 
+                | epsilon'''
 
 def p_type(p):
   '''type : INT OPENBRACKET CLOSEBRACKET
@@ -48,19 +48,18 @@ def p_type(p):
           | INT
           | ID'''
 
+def p_cmd_aux(p):
+  '''cmd_aux : cmd_aux cmd
+             | epsilon'''
+
 def p_cmd(p):
-  '''cmd : cmd_aux
+  '''cmd : OPENBRACER cmd_aux CLOSEBRACER
          | IF OPENPAREN exp CLOSEPAREN cmd
          | IF OPENPAREN exp CLOSEPAREN cmd ELSE cmd
          | WHILE OPENPAREN exp CLOSEPAREN cmd
          | PRINTLN OPENPAREN exp CLOSEPAREN SEMICOLON
          | ID ASSIGN exp SEMICOLON
-         | ID OPENBRACKET exp CLOSEBRACKET ASSIGN exp SEMICOLON
-         | epsilon'''
-
-def p_cmd_aux(p):
-  '''cmd_aux : OPENBRACER cmd_aux cmd CLOSEBRACER
-             | OPENBRACER CLOSEBRACER'''
+         | ID OPENBRACKET exp CLOSEBRACKET ASSIGN exp SEMICOLON'''
 
 def p_exp(p):
   '''exp : exp AND rexp
@@ -68,7 +67,10 @@ def p_exp(p):
 
 def p_rexp(p):
   '''rexp : rexp LESSTHAN aexp
+          | rexp LESSEQUAL aexp
           | rexp EQUALS aexp
+          | rexp GREATEREQUAL aexp
+          | rexp GREATERTHAN aexp
           | rexp NOTEQUALS aexp
           | aexp'''
 
@@ -101,13 +103,16 @@ def p_pexp(p):
           | pexp DOT ID
           | pexp DOT ID OPENPAREN CLOSEPAREN
           | pexp DOT ID OPENPAREN exps CLOSEPAREN'''
+def p_exps(p):
+  'exps : exp exp_aux'
 
-def p_exps(p):# llex = []
-  '''exps : exps
-          | epsilon'''
+def p_exp_aux(p):
+  '''exp_aux : exp_aux COMMA exp
+             | epsilon'''
 
-def p_exps_aux(p):# llex = []
-  'exps_aux : exp COMMA exp'
+def p_epsilon(p):
+  'epsilon :'
+  pass
 
 def p_error(p):
   if p:

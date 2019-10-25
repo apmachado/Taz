@@ -3,3 +3,4 @@ ply
 .vscode
 
 parser.out
+parsetab.py
