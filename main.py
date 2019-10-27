@@ -1,47 +1,38 @@
+import sys
 import lexer
 import parser
 import ply.lex as lex
 import ply.yacc as yacc
 
 
-def print_tree(node, prof=0):
+def print_tree(file, node, prof=0):
   if not node:
     return
+  spaces = '  ' * prof
   if isinstance(node, tuple):
-    print('  ' * prof, '<', node[0], '>')
+    file.write(spaces + ' <' +  node[0] + '>\n')
     if len(node) == 2:
       vizinhos = node[1]
       for v in vizinhos:
-        print_tree(v, prof + 1)
+        print_tree(file, v, prof + 1)
   else:
-    print('  ' * prof, node)
+    file.write(spaces + str(node) + '\n')
 
-prog = '''
-class Factorial{
-  public static void main(String[] a){
-    System.out.println(new Fac().ComputeFac(10));
-  }
-}
+if len(sys.argv) < 2:
+  print ('Informe o aquivo com o código fonte.')
+  raise SystemExit
 
-class Fac {
-  public int ComputeFac(int num){
-  int num_aux;
-  if (num < 1)
-    num_aux = 1;
-  else
-    num_aux = num * (this.ComputeFac(num-1));
-  return num_aux ;
-  }
-}
-'''
+fileName = sys.argv[1]
+source = open(fileName).read()
+output = open(fileName.split('.')[0] + '.out', 'w')
 
 scanner = lex.lex(module=lexer)
-scanner.input(prog)
-
-
-# for token in scanner:
-#   print(token)
-
 par = yacc.yacc(module=parser)
-result = par.parse(prog)
-print_tree(result)
+
+# analise lexica
+scanner.input(source)
+# analise sintatica
+result = par.parse(source)
+
+print_tree(output, result)
+output.close()
