@@ -24,7 +24,7 @@ if len(sys.argv) < 2:
 
 fileName = sys.argv[1]
 source = open(fileName).read()
-output = open(fileName.split('.')[0] + '.out', 'w')
+output = open(fileName.split('.')[0] + '.txt', 'w')
 
 scanner = lex.lex(module=lexer)
 par = yacc.yacc(module=parser)
