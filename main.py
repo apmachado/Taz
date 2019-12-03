@@ -1,6 +1,6 @@
 import sys
 import lexer
-import parser
+import my_parser
 import ply.lex as lex
 import ply.yacc as yacc
 
@@ -27,7 +27,7 @@ source = open(fileName).read()
 output = open(fileName.split('.')[0] + '.txt', 'w')
 
 scanner = lex.lex(module=lexer)
-par = yacc.yacc(module=parser)
+par = yacc.yacc(module=my_parser)
 
 # analise lexica
 scanner.input(source)
