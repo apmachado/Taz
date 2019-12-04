@@ -51,8 +51,7 @@ def p_type_aux(p):
 def p_type(p):
   '''type : INT OPENBRACKET CLOSEBRACKET
           | BOOLEAN
-          | INT
-          | ID'''
+          | INT'''
   p[0] = ('type',p[1:])
 
 def p_cmd_aux(p):

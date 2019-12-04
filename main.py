@@ -1,8 +1,10 @@
 import sys
 import lexer
 import my_parser
+import codegen
 import ply.lex as lex
 import ply.yacc as yacc
+
 
 
 def print_tree(file, node, prof=0):
@@ -25,6 +27,7 @@ if len(sys.argv) < 2:
 fileName = sys.argv[1]
 source = open(fileName).read()
 output = open(fileName.split('.')[0] + '.txt', 'w')
+# generated_code = open(fileName.split('.')[0] + 'bin.txt', 'w')
 
 scanner = lex.lex(module=lexer)
 par = yacc.yacc(module=my_parser)
@@ -36,3 +39,6 @@ result = par.parse(source)
 
 print_tree(output, result)
 output.close()
+
+# geracao de codigo
+codegen.cgen(result)
