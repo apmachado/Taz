@@ -12,9 +12,11 @@ def cgen(node):
             for v in vizinhos:
               cgen(v)
 
+        # EXP : EXP && REXP
+        elif node[0] == 'exp':
+          exp(node)
         elif node[0] == 'aexp': # soma ou subtracao
           aexp(node)
-          
         elif node[0] == 'mexp': # multiplicacao
           mexp(node)
         elif node[0] == 'sexp':
@@ -24,15 +26,6 @@ def cgen(node):
             cgen(v)
       except:
         print('erro em:', node)
-  else:
-    if isinstance(node, int) or isinstance(node, float):
-      # valores numéricos
-      # li $a0 num
-      print('LI $ao ' + str(node))
-    else:
-      pass
-      # if (not node in ['(', ')']):
-      #   print('token', node)
 
 # ('CMD', ['if', '(', EXP, ')', CMD]
 # vai comparar o que está no acumulador com $zero
@@ -52,21 +45,35 @@ def if_handler(node):
     cgen(node[1][4])
     print('end_if:')
 
+# EXP : EXP && REXP
+def exp(node):
+  if (len(node[1]) == 1):
+    cgen(node[1][0])
+    return
+
+  cgen(node[1][0])
+  print('SW $a0 0($sp)')
+  print('ADDIU $sp $sp -4')
+  cgen(node[1][2])
+  print('LW $t1 4($sp)')
+  print('ADDIU $sp $sp 4')
+  print('AND $a0 $t1 $a0')
+
 def aexp(node):
   if (len(node[1]) == 1):
     cgen(node[1][0])
     return
 
   cgen(node[1][0])
-  print('SW $ao 0($sp)')
+  print('SW $a0 0($sp)')
   print('ADDIU $sp $sp -4')
   cgen(node[1][2])
   print('LW $t1 4($sp)')
   print('ADDIU $sp $sp 4')
   if node[1][1] == '+':
-    print('ADD $a0 $t1 $ao')
+    print('ADD $a0 $t1 $a0')
   else:
-    print('SUB $a0 $t1 $ao')
+    print('SUB $a0 $t1 $a0')
 
 def mexp(node):
   if (len(node[1]) == 1):
@@ -74,21 +81,21 @@ def mexp(node):
     return
   
   cgen(node[1][0])
-  print('SW $ao 0($sp)')
+  print('SW $a0 0($sp)')
   print('ADDIU $sp $sp -4')
   cgen(node[1][2])
   print('LW $t1 4($sp)')
   print('ADDIU $sp $sp 4')
-  print('MULT $a0 $t1 $ao')
+  print('MULT $a0 $t1 $a0')
 
 def sexp(node):
-  if len(node) == 1:
-    valor = node[1][0]
-    if isinstance(valor, int) or isinstance(valor, float):
-      print('li $ao ' + str(node))
-    else:
-      cgen(valor)
+  vizinhos = node[1]
+  if isinstance(vizinhos[0], int):
+    print('LI $a0 ' + str(node))
+  elif vizinhos[0] == 'true':
+    print('LI $a0 1')
+  elif vizinhos[0] == 'false' or vizinhos[0] == 'null':
+    print('LI $a0 0')
   else:
-    vizinhos = node[1]
     for v in vizinhos:
       cgen(v)

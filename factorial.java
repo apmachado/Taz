@@ -8,7 +8,7 @@ class Fac {
 
     public int ComputeFac(int num){
 			int x;
-			if (9 + 7)
+			if (9 && null)
 				x = 3 + (20 * 5);
 			else
 				x = 111;

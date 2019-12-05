@@ -42,3 +42,4 @@ output.close()
 
 # geracao de codigo
 codegen.cgen(result)
+# print(result)
