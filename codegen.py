@@ -5,17 +5,20 @@ def cgen(node):
     if len(node) == 2:
       try:
         vizinhos = node[1]
-        # operacoes binarias
-        if len(vizinhos) == 3:
-          if node[0] == 'aexp': # soma ou subtracao
-            aexp(node)
-          elif node[0] == 'mexp': # multiplicacao
-            mexp(node)
-          elif node[0] == 'sexp':
-            sexp(node)
+        if node[0] == 'cmd':
+          if (vizinhos[0] == 'if'):
+            if_handler(node)
           else:
             for v in vizinhos:
               cgen(v)
+
+        elif node[0] == 'aexp': # soma ou subtracao
+          aexp(node)
+          
+        elif node[0] == 'mexp': # multiplicacao
+          mexp(node)
+        elif node[0] == 'sexp':
+          sexp(node)
         else:
           for v in vizinhos:
             cgen(v)
@@ -31,8 +34,29 @@ def cgen(node):
       # if (not node in ['(', ')']):
       #   print('token', node)
 
+# ('CMD', ['if', '(', EXP, ')', CMD]
+# vai comparar o que está no acumulador com $zero
+# se o acumulador for diferente de zero eh verdadeiro
+def if_handler(node):
+  cgen(node[1][2])
+  if len(node[1]) == 7: # if else
+    print('beq $a0 $zero false_branch')
+    cgen(node[1][4])
+    print('B end_if')
+    # else
+    print('false_branch:')
+    cgen(node[1][6])
+    print('end_if:')
+  else: # somente o if
+    print('beq $a0 $zero end_if')
+    cgen(node[1][4])
+    print('end_if:')
 
 def aexp(node):
+  if (len(node[1]) == 1):
+    cgen(node[1][0])
+    return
+
   cgen(node[1][0])
   print('SW $ao 0($sp)')
   print('ADDIU $sp $sp -4')
@@ -45,6 +69,10 @@ def aexp(node):
     print('SUB $a0 $t1 $ao')
 
 def mexp(node):
+  if (len(node[1]) == 1):
+    cgen(node[1][0])
+    return
+  
   cgen(node[1][0])
   print('SW $ao 0($sp)')
   print('ADDIU $sp $sp -4')
