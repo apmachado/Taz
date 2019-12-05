@@ -91,7 +91,7 @@ def mexp(node):
 def sexp(node):
   vizinhos = node[1]
   if isinstance(vizinhos[0], int):
-    print('LI $a0 ' + str(node))
+    print('LI $a0 ' + str(vizinhos[0]))
   elif vizinhos[0] == 'true':
     print('LI $a0 1')
   elif vizinhos[0] == 'false' or vizinhos[0] == 'null':
