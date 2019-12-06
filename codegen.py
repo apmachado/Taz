@@ -1,3 +1,14 @@
+# para criar nomes de labels distintos
+# ex: branch_true_2
+# cada label criada ela deve ser incrementada
+label_count = 0
+
+def get_label_name(name):
+  global label_count
+  name = name + '_' + str(label_count)
+  label_count = label_count + 1
+  return name
+
 def cgen(node):
   if not node:
     return
@@ -15,6 +26,8 @@ def cgen(node):
         # EXP : EXP && REXP
         elif node[0] == 'exp':
           exp(node)
+        elif node[0] == 'rexp':
+          rexp(node)
         elif node[0] == 'aexp': # soma ou subtracao
           aexp(node)
         elif node[0] == 'mexp': # multiplicacao
@@ -31,19 +44,22 @@ def cgen(node):
 # vai comparar o que está no acumulador com $zero
 # se o acumulador for diferente de zero eh verdadeiro
 def if_handler(node):
+  branch_true = get_label_name('branch_true')
+  end_if = get_label_name('end_if')
   cgen(node[1][2])
   if len(node[1]) == 7: # if else
-    print('beq $a0 $zero false_branch')
+    branch_false = get_label_name('branch_false')
+    print('BEQ $a0 $zero ' + branch_false)
     cgen(node[1][4])
-    print('B end_if')
+    print('B ' + end_if)
     # else
-    print('false_branch:')
+    print(branch_false + ':')
     cgen(node[1][6])
-    print('end_if:')
+    print(end_if + ':')
   else: # somente o if
-    print('beq $a0 $zero end_if')
+    print('BEQ $a0 $zero ' + end_if)
     cgen(node[1][4])
-    print('end_if:')
+    print(end_if + ':')
 
 # EXP : EXP && REXP
 def exp(node):
@@ -59,8 +75,53 @@ def exp(node):
   print('ADDIU $sp $sp 4')
   print('AND $a0 $t1 $a0')
 
+def rexp(node):
+  if len(node[1]) == 1:
+    cgen(node[1][0])
+    return
+  op = node[1][1]
+
+  if op == '!=':
+    branch_true = get_label_name('branch_true')
+    end_if = get_label_name('end_if')
+    cgen(node[1][0])
+    print('SW $a0 0($sp)')
+    print('ADDIU $sp $sp -4')
+    cgen(node[1][2])
+    print('LW $t1 4($sp)')
+    print('ADDIU $sp $sp 4')
+    print('BNE $a0 $t1 ' + branch_true)
+    print('LI $a0 0')
+    print('B ' + end_if)
+    print(branch_true + ':')
+    print('LI $a0 1')
+    print(end_if + ':')
+  elif op == '==':
+    branch_true = get_label_name('branch_true')
+    end_if = get_label_name('end_if')
+    cgen(node[1][0])
+    print('SW $a0 0($sp)')
+    print('ADDIU $sp $sp -4')
+    cgen(node[1][2])
+    print('LW $t1 4($sp)')
+    print('ADDIU $sp $sp 4')
+    print('BEQ $a0 $t1 ' + branch_true)
+    print('LI $a0 0')
+    print('B ' + end_if)
+    print(branch_true + ':')
+    print('LI $a0 1')
+    print(end_if + ':')
+  elif op == '<':
+    cgen(node[1][0])
+    print('SW $a0 0($sp)')
+    print('ADDIU $sp $sp -4')
+    cgen(node[1][2])
+    print('LW $t1 4($sp)')
+    print('ADDIU $sp $sp 4')
+    print('SLT $a0, $t1, $a0')
+
 def aexp(node):
-  if (len(node[1]) == 1):
+  if len(node[1]) == 1:
     cgen(node[1][0])
     return
 
@@ -76,7 +137,7 @@ def aexp(node):
     print('SUB $a0 $t1 $a0')
 
 def mexp(node):
-  if (len(node[1]) == 1):
+  if len(node[1]) == 1:
     cgen(node[1][0])
     return
   
@@ -86,7 +147,7 @@ def mexp(node):
   cgen(node[1][2])
   print('LW $t1 4($sp)')
   print('ADDIU $sp $sp 4')
-  print('MULT $a0 $t1 $a0')
+  print('MUL $a0 $t1 $a0')
 
 def sexp(node):
   vizinhos = node[1]
