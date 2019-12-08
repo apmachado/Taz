@@ -33,6 +33,8 @@ def cgen(node):
         elif node[0] == 'cmd':
           if vizinhos[0] == 'if':
             if_handler(node)
+          elif vizinhos[0] == 'while':
+            while_handler(node)
           elif vizinhos[0] == 'System.out.println':
             print_handler(node)
           elif vizinhos[0] in curr_context:
@@ -67,12 +69,15 @@ def cgen(node):
 # MAIN : class id '{' public static void main '(' String '[' ']' id ')' '{' CMD '}' '}'
 def main(node):
   vizinhos = node[1]
+  print('.data')
+  print('newline: .asciiz "\\n"')
+  print('.text\n')
   print('main:')
   cgen(vizinhos[14]) # CMD
   print('\nexit: ')
   print('LI $v0, 10')
   print('syscall')
-  print('\n# funcoes')
+  # print('\n# funcoes')
 
 
 # METODO : public TIPO id '(' PARAMS ')' '{' VAR_AUX CMD_AUX return EXP ; '}'
@@ -87,7 +92,7 @@ def metodo_handler(node):
   if len(vizinhos) == 13:
     cgen(vizinhos[4])
 
-  print('f_' + vizinhos[2] + ':')
+  print('\nf_' + vizinhos[2] + ':')
   print('MOVE $fp $sp')
   print('SW $ra 0($sp)')
   print('ADDIU $sp $sp -4')
@@ -99,9 +104,9 @@ def metodo_handler(node):
     cgen(vizinhos[6])
     cgen(vizinhos[7])
     cgen(vizinhos[9])
-  # como achar o z?
+  num_parametros = len(curr_context)
   print('LW $ra 4($sp)')
-  print('ADDIU $sp $sp ' + str((num_parametros * 4) + 8))
+  print('ADDIU $sp $sp ' + str((num_parametros * 4) + 8) + ' # desempilha a funcao')
   print('LW $fp 0($sp)')
   print('JR $ra')
 
@@ -143,9 +148,25 @@ def if_handler(node):
     cgen(node[1][4])
     print(end_if + ':')
 
+def while_handler(node):
+  vizinhos = node[1]
+  loop_label = get_label_name('loop')
+  exit_label = get_label_name('exit')
+  print(loop_label + ':')
+  cgen(vizinhos[2])
+  # print('LI $v0, 1')
+  # print('syscall')
+  print('BEQ $a0 $zero ' + exit_label) # se for falso sai do loop
+  cgen(vizinhos[4])
+  print('B ' + loop_label)
+  print(exit_label + ':')
+
 def print_handler(node):
   cgen(node[1][2])
   print('LI $v0, 1')
+  print('syscall')
+  print('LI $v0, 4')
+  print('LA $a0, newline')
   print('syscall')
 
 def atribuicao(node):
