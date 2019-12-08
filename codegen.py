@@ -18,14 +18,15 @@ def cgen(node):
     if len(node) == 2:
       try:
         vizinhos = node[1]
-        if node[0] == 'cmd':
+        if node[0] == 'method':
+          metodo_handler(node)
+        elif node[0] == 'cmd':
           if (vizinhos[0] == 'if'):
             if_handler(node)
           else:
             for v in vizinhos:
               cgen(v)
 
-        # EXP : EXP && REXP
         elif node[0] == 'exp':
           exp(node)
         elif node[0] == 'rexp':
@@ -48,6 +49,30 @@ def cgen(node):
       except Exception:
         print('erro em:', node)
         traceback.print_exc()
+
+# METODO : public TIPO id '(' PARAMS ')' '{' VAR_AUX CMD_AUX return EXP ; '}'
+#        | public TIPO id '(' ')' '{' VAR_AUX CMD_AUX return EXP ; '}'
+def metodo_handler(node):
+  vizinhos = node[1]
+  num_parametros = 0
+  print('f_' + vizinhos[2] + ':')
+  print('MOVE $fp $sp')
+  print('SW $ra 0($sp)')
+  print('ADDIU $sp $sp -4')
+  if len(vizinhos) == 13:
+    cgen(vizinhos[7])
+    cgen(vizinhos[8])
+    cgen(vizinhos[10])
+  else:
+    cgen(vizinhos[6])
+    cgen(vizinhos[7])
+    cgen(vizinhos[9])
+  # como achar o z?
+  print('LW $ra 4($sp)')
+  print('ADDIU $sp $sp ' + str((num_parametros * 4) + 8))
+  print('LW $fp 0($sp)')
+  print('JR $ra')
+
 
 # ('CMD', ['if', '(', EXP, ')', CMD]
 # vai comparar o que está no acumulador com $zero
@@ -90,7 +115,7 @@ def rexp(node):
     return
   op = node[1][1]
 
-  if op == '!=':
+  if op == '!==' or op == '==':
     branch_true = get_label_name('branch_true')
     end_if = get_label_name('end_if')
     cgen(node[1][0])
@@ -99,22 +124,10 @@ def rexp(node):
     cgen(node[1][2])
     print('LW $t1 4($sp)')
     print('ADDIU $sp $sp 4')
-    print('BNE $a0 $t1 ' + branch_true)
-    print('LI $a0 0')
-    print('B ' + end_if)
-    print(branch_true + ':')
-    print('LI $a0 1')
-    print(end_if + ':')
-  elif op == '==':
-    branch_true = get_label_name('branch_true')
-    end_if = get_label_name('end_if')
-    cgen(node[1][0])
-    print('SW $a0 0($sp)')
-    print('ADDIU $sp $sp -4')
-    cgen(node[1][2])
-    print('LW $t1 4($sp)')
-    print('ADDIU $sp $sp 4')
-    print('BEQ $a0 $t1 ' + branch_true)
+    if op == '!==':
+      print('BNE $a0 $t1 ' + branch_true)
+    else:
+      print('BEQ $a0 $t1 ' + branch_true)
     print('LI $a0 0')
     print('B ' + end_if)
     print(branch_true + ':')

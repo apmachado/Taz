@@ -7,7 +7,7 @@ class Factorial{
 class Fac {
     public int ComputeFac(int num){
 			int x;
-			if (13 < 13)
+			if (13 == 13)
 				x = 3 + (20 * 5);
 			else
 				num_aux = num * (this.ComputeFac(42, 40 + 5));
