@@ -2,5 +2,6 @@ __pycache__
 ply
 .vscode
 factorial.txt
+out.txt
 parser.out
 parsetab.py

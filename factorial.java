@@ -1,17 +1,15 @@
 class Factorial{
     public static void main(String[] a){
-	System.out.println(new Fac().ComputeFac(10));
+	System.out.println(new Fac().ComputeFac(50, 50));
     }
 }
 
 class Fac {
-    public int ComputeFac(int num){
-			int x;
-			if (13 == 13)
+    public int ComputeFac(int x, int y){
+			if (x == y)
 				x = 3 + (20 * 5);
 			else
-				num_aux = num * (this.ComputeFac(42, 40 + 5));
-			
+				x =  y * 10;
 			return x;
     }
 

@@ -5,6 +5,9 @@ import traceback
 # cada label criada ela deve ser incrementada
 label_count = 0
 
+global_context = []
+curr_context = []
+
 def get_label_name(name):
   global label_count
   name = name + '_' + str(label_count)
@@ -18,11 +21,22 @@ def cgen(node):
     if len(node) == 2:
       try:
         vizinhos = node[1]
-        if node[0] == 'method':
+        if node[0] == 'main':
+          main(node)
+        elif node[0] == 'method':
           metodo_handler(node)
+        elif node[0] == 'params':
+          params(node)
+        elif node[0] == 'type_aux':
+          type_aux(node)
+        # CMD
         elif node[0] == 'cmd':
-          if (vizinhos[0] == 'if'):
+          if vizinhos[0] == 'if':
             if_handler(node)
+          elif vizinhos[0] == 'System.out.println':
+            print_handler(node)
+          elif vizinhos[0] in curr_context:
+            atribuicao(node)
           else:
             for v in vizinhos:
               cgen(v)
@@ -49,12 +63,30 @@ def cgen(node):
       except Exception:
         print('erro em:', node)
         traceback.print_exc()
+# codigo da main
+# MAIN : class id '{' public static void main '(' String '[' ']' id ')' '{' CMD '}' '}'
+def main(node):
+  vizinhos = node[1]
+  print('main:')
+  cgen(vizinhos[14]) # CMD
+  print('\nexit: ')
+  print('LI $v0, 10')
+  print('syscall')
+  print('\n# funcoes')
+
 
 # METODO : public TIPO id '(' PARAMS ')' '{' VAR_AUX CMD_AUX return EXP ; '}'
 #        | public TIPO id '(' ')' '{' VAR_AUX CMD_AUX return EXP ; '}'
 def metodo_handler(node):
+  global curr_context
   vizinhos = node[1]
   num_parametros = 0
+  context = []
+  curr_context = context
+  # se existir parametros chama cgen para eles
+  if len(vizinhos) == 13:
+    cgen(vizinhos[4])
+
   print('f_' + vizinhos[2] + ':')
   print('MOVE $fp $sp')
   print('SW $ra 0($sp)')
@@ -73,6 +105,22 @@ def metodo_handler(node):
   print('LW $fp 0($sp)')
   print('JR $ra')
 
+# PARAMS : TIPO id TIPO_AUX
+
+# TIPO_AUX : TIPO_AUX , TIPO id
+#          | epsilon
+def params(node):
+  vizinhos = node[1]
+  curr_context.append(node[1][1])
+  cgen(node[1][2])
+
+def type_aux(node):
+  if len(node[1]) == 1 and node[1][0] == None:
+    return
+  vizinhos = node[1]
+  curr_context.append(node[1][3])
+  if vizinhos[0] != None:
+    cgen(node[1][0])
 
 # ('CMD', ['if', '(', EXP, ')', CMD]
 # vai comparar o que está no acumulador com $zero
@@ -95,6 +143,18 @@ def if_handler(node):
     cgen(node[1][4])
     print(end_if + ':')
 
+def print_handler(node):
+  cgen(node[1][2])
+  print('LI $v0, 1')
+  print('syscall')
+
+def atribuicao(node):
+  vizinhos = node[1]
+  if len(vizinhos) == 4:
+    cgen(vizinhos[2])
+    z = (curr_context.index(vizinhos[0]) + 1) * 4
+    print('SW $a0 %i($fp) ' %z, end ='')
+    print('# %s <- $a0' % vizinhos[0])
 # EXP : EXP && REXP
 def exp(node):
   if (len(node[1]) == 1):
@@ -185,20 +245,22 @@ def sexp(node):
 
 def pexp(node):
   vizinhos = node[1]
-  if len(vizinhos) >= 5:
+  if vizinhos[0] in curr_context:
+    z = (curr_context.index(vizinhos[0]) + 1) * 4 # calcular z
+    print('LW $a0 %i($fp) ' %z, end = '')
+    print('# $a0 <- %s' % vizinhos[0])
+  elif len(vizinhos) >= 5: # se eh uma chamada de funcao
     print('SW $fp 0($sp)')
     print('ADDIU $sp $sp -4')
     if len(vizinhos) == 6:
       cgen(vizinhos[4])
-    print('JAL f_' + node[1][2])
+    print('JAL f_' + vizinhos[2])
   else:
     for v in vizinhos:
       cgen(v)
 
 # EXPS : EXP EXP_AUX
 def exps(node):
-  if len(node[1]) == 1 and node[1][0] == None:
-    return
   cgen(node[1][1])
   cgen(node[1][0]) # ultimo parametro
   print('SW $a0 0($sp)')
