@@ -69,6 +69,7 @@ def cgen(node):
 # MAIN : class id '{' public static void main '(' String '[' ']' id ')' '{' CMD '}' '}'
 def main(node):
   vizinhos = node[1]
+  print('# ==== CODIGO MIPS ====')
   print('.data')
   print('newline: .asciiz "\\n"')
   print('.text\n')

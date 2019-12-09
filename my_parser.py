@@ -1,8 +1,5 @@
 from lexer import tokens
 
-teste = dict()
-lista = list()
-lista.append(teste)
 
 def p_prog(p):
   'prog : main class_aux '
@@ -30,9 +27,6 @@ def p_var_aux(p):
 
 def p_var(p):
   'var : type ID SEMICOLON'
-  teste[p[2]] = id(p[2]) #aqui poderia ser 0, e modificar depois pelo atribuido;
-  lista[-1] = teste
-  print(lista)
   p[0] = ('var',p[1:])
 
 def p_method_aux(p):
@@ -47,7 +41,6 @@ def p_method(p):
 
 def p_params(p):
   'params : type ID type_aux'
-  #print('params',p[0:])
   p[0] = ('params',p[1:])
 
 def p_type_aux(p):
@@ -64,7 +57,6 @@ def p_type(p):
 def p_cmd_aux(p):
   '''cmd_aux : cmd_aux cmd
              | epsilon'''
-  #print(p[0:])
   p[0] = ('cmd_aux',p[1:])
 
 def p_cmd(p):
@@ -75,20 +67,11 @@ def p_cmd(p):
          | PRINTLN OPENPAREN exp CLOSEPAREN SEMICOLON
          | ID ASSIGN exp SEMICOLON
          | ID OPENBRACKET exp CLOSEBRACKET ASSIGN exp SEMICOLON'''
-  #ESSES BRACERS NAO ESÃO CERTOS -
-  if(p[len(p)-1][-1] == '}'):
-    if("a" == "a"): #começar daqui amanhã 
-      lista.append(dict())
-    else:
-      lista.pop(-1)
-  elif(p[2] == '='):
-    verify(p[1])
   p[0] = ('cmd',p[1:])
 
 def p_exp(p):
   '''exp : exp AND rexp
          | rexp'''
-  #print('exp',p[0:])
   p[0] = ('exp',p[1:])
 
 def p_rexp(p):
@@ -99,20 +82,17 @@ def p_rexp(p):
           | rexp GREATERTHAN aexp
           | rexp NOTEQUALS aexp
           | aexp'''
-  #print('rexp',p[0:])
   p[0] = ('rexp',p[1:])
 
 def p_aexp(p):
   '''aexp : aexp ADDOP mexp
           | aexp SUBOP mexp
           | mexp'''
-  #print(p[1:]) #percorrer tupla pra achar constantes e calcular.  Chamar função do que tá dentro.      
   p[0] = ('aexp',p[1:])
 
 def p_mexp(p):
   '''mexp : mexp MULTOP sexp
           | sexp'''
-  #print('mexp',p[0:])
   p[0] = ('mexp',p[1:])
 
 def p_sexp(p):
@@ -126,7 +106,6 @@ def p_sexp(p):
           | pexp DOT LENGTH
           | pexp OPENBRACKET exp CLOSEBRACKET
           | pexp'''
-  #print('sexp',p[0:])        
   p[0] = ('sexp',p[1:])
 
 def p_pexp(p):
@@ -137,25 +116,7 @@ def p_pexp(p):
           | pexp DOT ID
           | pexp DOT ID OPENPAREN CLOSEPAREN
           | pexp DOT ID OPENPAREN exps CLOSEPAREN'''
-  if(len(p) == 2 and p[1] != 'this'):
-    verify(p[1])
   p[0] = ('pexp',p[1:])
-
-def verify(variable):
-    i = -1
-    k = len(lista)
-    print(lista)
-    for j in range(k):
-      if(variable in lista[i]):
-        #lista[-1].pegar chave no ultimo escopo e alterar valor de chave (nao a chave)
-        #lista[i][p[1]]= ...
-        #print(lista[i][p[1]])
-        j = k
-      else:
-        i = i+1
-    if(j<k):
-      print('Variable', variable,'not declared!')
-      lista[j][variable] #Interrompe a execução
 
 def p_exps(p):
   'exps : exp exp_aux'
@@ -175,5 +136,3 @@ def p_error(p):
     print("Syntax error at '%s'" % p.value)
   else:
     print("Syntax error at EOF")
-
-
