@@ -106,23 +106,15 @@ def p_cmd(p):
   elif(p[2] == '='):
     verify(p[1])
     number = -1
+    ## essa parte seria usada para atribuir valor
     for i in (p[3][-1]):
       for j in (i):
         data, peso = i[-1][-1]
-        #print('data', data)
         for k in peso:
           b = k[1]
           for l in b:
             if(len(l)>1):
-              #print('jefif', l[1][-1])
               number = l[1][-1]
-    #if(b != 'rexp' and b != 'mexp' and b != 'sexp' and b != 'aexp'):
-    #    print('eee',b)
-    #contador = len(p[3])
-    #while((a[0][i] == 'aexp' or a[0][i] != 'mexp' or a[0][i] != 'mexp'
-    #or a[0][i] != 'pexp') and i<10):
-     # print('eee',a[0][i])
-      #i = i+1
     if(number != -1):
       lista[-1][p[1]] = number   
     #else:
