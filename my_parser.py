@@ -52,10 +52,10 @@ def p_params(p):
   p[0] = ('params',p[1:])
   lista[-1][p[2]] = id([p[2]])
   aux = p[3][-1]
-  for i in range(4):
+  while(aux != [None]):
     lista[-1][aux[-1]] = id(aux[-1])
     aux = aux[0][-1]
-
+    
 def p_type_aux(p):
   '''type_aux : type_aux COMMA type ID 
                 | epsilon'''
@@ -127,7 +127,6 @@ def p_cmd(p):
       lista[-1][p[1]] = number   
     else:
       lista[-1][p[1]] = calculate(number1, number2, op)
-    print(lista[-1][p[1]])  
     
   p[0] = ('cmd',p[1:])   
 
@@ -193,7 +192,7 @@ def p_pexp(p):
           | pexp DOT ID OPENPAREN exps CLOSEPAREN'''
   if(len(p) == 2 and p[1] != 'this'):
     verify(p[1])
-    
+  
   p[0] = ('pexp',p[1:])
 
 def verify(variable):
@@ -208,7 +207,7 @@ def verify(variable):
     if(j<k):
       print('Variable', variable,'not declared!')
       lista[j][variable] #Interrompe a execução
-    print('Variable', variable, 'correct declared')
+    print('Variable', variable, 'correctly declared')
 
 def p_exps(p):
   'exps : exp exp_aux'
