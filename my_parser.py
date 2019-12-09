@@ -105,20 +105,6 @@ def p_cmd(p):
       booleanoElse = False
   elif(p[2] == '='):
     verify(p[1])
-    number = -1
-    ## essa parte seria usada para atribuir valor
-    for i in (p[3][-1]):
-      for j in (i):
-        data, peso = i[-1][-1]
-        for k in peso:
-          b = k[1]
-          for l in b:
-            if(len(l)>1):
-              number = l[1][-1]
-    if(number != -1):
-      lista[-1][p[1]] = number   
-    #else:
-      #lista[-1][p[1]] = calculate(number1, number2, op)
     
   p[0] = ('cmd',p[1:])   
 
