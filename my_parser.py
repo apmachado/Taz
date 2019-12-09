@@ -1,5 +1,10 @@
 from lexer import tokens
 
+varEscopo = dict()
+lista = list()
+booleanoElse = False
+lista.append(varEscopo)
+countCurlies = 0
 
 def p_prog(p):
   'prog : main class_aux '
@@ -19,6 +24,7 @@ def p_class(p):
   '''class : CLASS ID OPENBRACER var_aux method_aux CLOSEBRACER
            | CLASS ID EXTENDS ID OPENBRACER var_aux method_aux CLOSEBRACER'''
   p[0] = ('class',p[1:])
+  
 
 def p_var_aux(p):
   '''var_aux : var_aux var
@@ -27,6 +33,8 @@ def p_var_aux(p):
 
 def p_var(p):
   'var : type ID SEMICOLON'
+  varEscopo[p[2]] = id(p[2])
+  lista[-1] = varEscopo
   p[0] = ('var',p[1:])
 
 def p_method_aux(p):
@@ -42,7 +50,12 @@ def p_method(p):
 def p_params(p):
   'params : type ID type_aux'
   p[0] = ('params',p[1:])
-
+  lista[-1][p[2]] = id([p[2]])
+  aux = p[3][-1]
+  while(aux != [None]):
+    lista[-1][aux[-1]] = id(aux[-1])
+    aux = aux[0][-1]
+    
 def p_type_aux(p):
   '''type_aux : type_aux COMMA type ID 
                 | epsilon'''
@@ -57,8 +70,13 @@ def p_type(p):
 def p_cmd_aux(p):
   '''cmd_aux : cmd_aux cmd
              | epsilon'''
+  global countCurlies
   p[0] = ('cmd_aux',p[1:])
-
+  if(booleanoElse):
+    for i in range(countCurlies):
+        lista.pop(-1)
+        countCurlies = countCurlies-1
+   
 def p_cmd(p):
   '''cmd : OPENBRACER cmd_aux CLOSEBRACER
          | IF OPENPAREN exp CLOSEPAREN cmd
@@ -67,11 +85,56 @@ def p_cmd(p):
          | PRINTLN OPENPAREN exp CLOSEPAREN SEMICOLON
          | ID ASSIGN exp SEMICOLON
          | ID OPENBRACKET exp CLOSEBRACKET ASSIGN exp SEMICOLON'''
-  p[0] = ('cmd',p[1:])
+  global booleanoElse
+  global countCurlies
+  if(p[len(p)-1][-1][-1] == '}' or p[1]=='{'):
+    if(countCurlies < repr(p[0:]).count('}')):
+      for i in range(countCurlies):
+        if(len(p[1:]) == 7):
+            countCurlies = countCurlies+1
+            lista.append(dict())
+            booleanoElse = True
+        else:
+            countCurlies = countCurlies+1
+            booleanoElse = False 
+        lista.append(dict())
+    else:
+      for i in range(countCurlies):
+        lista.pop(-1)
+        countCurlies = countCurlies-1
+      booleanoElse = False
+  elif(p[2] == '='):
+    verify(p[1])
+    number = -1
+    ## essa parte seria usada para atribuir valor
+    for i in (p[3][-1]):
+      for j in (i):
+        data, peso = i[-1][-1]
+        for k in peso:
+          b = k[1]
+          for l in b:
+            if(len(l)>1):
+              number = l[1][-1]
+    if(number != -1):
+      lista[-1][p[1]] = number   
+    #else:
+      #lista[-1][p[1]] = calculate(number1, number2, op)
+    
+  p[0] = ('cmd',p[1:])   
+
+def calculate(number1, number2, op):
+  if(op == '*'):
+    return number1*number2
+  elif(op == '+'):
+    return number1+number2
+  elif(op == '-'):  
+    return number1-number2    
+  pass
 
 def p_exp(p):
   '''exp : exp AND rexp
          | rexp'''
+  #print('exp',p[0:])
   p[0] = ('exp',p[1:])
 
 def p_rexp(p):
@@ -82,6 +145,7 @@ def p_rexp(p):
           | rexp GREATERTHAN aexp
           | rexp NOTEQUALS aexp
           | aexp'''
+  #print('rexp',p[0:])
   p[0] = ('rexp',p[1:])
 
 def p_aexp(p):
@@ -93,6 +157,7 @@ def p_aexp(p):
 def p_mexp(p):
   '''mexp : mexp MULTOP sexp
           | sexp'''
+  #print('mexp',p[0:])
   p[0] = ('mexp',p[1:])
 
 def p_sexp(p):
@@ -106,6 +171,7 @@ def p_sexp(p):
           | pexp DOT LENGTH
           | pexp OPENBRACKET exp CLOSEBRACKET
           | pexp'''
+  #print('sexp',p[0:])        
   p[0] = ('sexp',p[1:])
 
 def p_pexp(p):
@@ -116,7 +182,25 @@ def p_pexp(p):
           | pexp DOT ID
           | pexp DOT ID OPENPAREN CLOSEPAREN
           | pexp DOT ID OPENPAREN exps CLOSEPAREN'''
+  if(len(p) == 2 and p[1] != 'this'):
+    verify(p[1])
+  
   p[0] = ('pexp',p[1:])
+
+
+def verify(variable):
+    i = -1
+    k = len(lista) # lista é a lista de escopos; 
+    j = 0
+    for j in range(k):
+      if(variable in lista[i]):
+        j = k
+      else:
+        i = i+1
+    if(j<k):
+      print('Variable', variable,'not declared!')
+      lista[j][variable] #Interrompe a execução
+    print('Variable', variable, 'correctly declared')
 
 def p_exps(p):
   'exps : exp exp_aux'
